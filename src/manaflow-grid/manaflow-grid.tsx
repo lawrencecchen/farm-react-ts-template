@@ -707,7 +707,7 @@ export function Grid({
   const gridStyle = useMemo(
     () => ({
       gridTemplateRows,
-      gridTemplateColumns: `repeat(${cols}, 1fr)`,
+      gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
     }),
     [gridTemplateRows, cols]
   );
