@@ -176,6 +176,7 @@ export const handleMouseMove = (
       rowSpan: number
     ) => void;
     expandRowsIfNeeded: (requestedRow: number) => void;
+    gridCols: number;
   }
 ) => {
   const {
@@ -189,6 +190,7 @@ export const handleMouseMove = (
     setActiveItemDimensions,
     updateGridItemPosition,
     expandRowsIfNeeded,
+    gridCols,
   } = params;
 
   // Handle resize
@@ -209,7 +211,7 @@ export const handleMouseMove = (
     const gridContainer = gridItemRef.current.closest(".grid-wrapper");
     if (!gridContainer) return;
 
-    const cellWidth = gridContainer.getBoundingClientRect().width / 12;
+    const cellWidth = gridContainer.getBoundingClientRect().width / gridCols;
 
     // Calculate new width and height based on which corner is being dragged
     let newWidth = resizeRef.current.startWidth;
@@ -224,7 +226,7 @@ export const handleMouseMove = (
       newWidth += adjustedDeltaX;
 
       // Ensure we don't exceed grid boundaries
-      const maxWidth = (13 - newColStart) * cellWidth;
+      const maxWidth = (gridCols + 1 - newColStart) * cellWidth;
       newWidth = Math.min(newWidth, maxWidth);
     } else if (
       resizeRef.current.corner.includes("Left") ||
@@ -240,10 +242,10 @@ export const handleMouseMove = (
       const potentialNewColStart =
         resizeRef.current.startColStart + deltaColumns;
 
-      // Ensure colStart stays within valid range (1 to 12)
+      // Ensure colStart stays within valid range (1 to gridCols)
       let newPotentialColStart = Math.max(
         1,
-        Math.min(12, potentialNewColStart)
+        Math.min(gridCols, potentialNewColStart)
       );
 
       // Don't allow moving beyond the right edge of the original element
@@ -334,15 +336,15 @@ export const handleMouseMove = (
     // Calculate new spans based on dynamic grid cell dimensions
     let newColSpan = Math.max(
       1,
-      Math.min(12, Math.round(newWidth / cellWidth))
+      Math.min(gridCols, Math.round(newWidth / cellWidth))
     );
 
     // For row span, use the fixed row height
     const newRowSpan = Math.max(1, Math.round(newHeight / GRID_CELL_HEIGHT));
 
     // Handle edge case: ensure we don't exceed grid boundaries
-    if (newColStart + newColSpan > 13) {
-      newColSpan = 13 - newColStart;
+    if (newColStart + newColSpan > gridCols + 1) {
+      newColSpan = gridCols + 1 - newColStart;
     }
 
     // Store current position to revert if collisions can't be resolved
@@ -473,18 +475,18 @@ export const handleMouseMove = (
     const gridContainer = gridItemRef.current.closest(".grid-wrapper");
     if (!gridContainer) return;
 
-    const cellWidth = gridContainer.getBoundingClientRect().width / 12;
+    const cellWidth = gridContainer.getBoundingClientRect().width / gridCols;
 
     // Calculate new grid positions
     const deltaColStart = Math.round(adjustedDeltaX / cellWidth);
     const deltaRowStart = Math.round(adjustedDeltaY / GRID_CELL_HEIGHT);
 
     // Calculate new colStart and rowStart with constraints
-    // For horizontal movement: ensure we don't exceed grid boundaries (1 to 13-colSpan)
+    // For horizontal movement: ensure we don't exceed grid boundaries (1 to gridCols + 1 - colSpan)
     const newColStart = Math.max(
       1,
       Math.min(
-        13 - gridItems[itemId].colSpan,
+        gridCols + 1 - gridItems[itemId].colSpan,
         dragRef.current.startColStart + deltaColStart
       )
     );

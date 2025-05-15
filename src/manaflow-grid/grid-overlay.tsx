@@ -1,17 +1,18 @@
-import type { RefObject } from "react";
-import { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { GRID_CELL_HEIGHT } from "./const";
 
-interface GridOverlayProps {
+export interface GridOverlayProps {
   isVisible: boolean;
   rowCount: number;
-  gridRef: RefObject<HTMLDivElement>;
+  gridRef: React.RefObject<HTMLDivElement>;
+  cols: number;
 }
 
 export function GridOverlay({
   isVisible,
   rowCount,
   gridRef,
+  cols,
 }: GridOverlayProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -50,10 +51,9 @@ export function GridOverlay({
     ctx.lineWidth = 1;
 
     // Draw vertical grid lines
-    const totalCols = 12;
-    const cellWidth = width / 12;
+    const cellWidth = width / cols; // Use cols from props
 
-    for (let col = 0; col <= totalCols; col++) {
+    for (let col = 0; col <= cols; col++) {
       const x = col * cellWidth;
       ctx.beginPath();
       ctx.moveTo(x, 0);
@@ -69,7 +69,7 @@ export function GridOverlay({
       ctx.lineTo(width, y);
       ctx.stroke();
     }
-  }, [gridRef, rowCount]);
+  }, [gridRef, rowCount, cols]); // Add cols to dependency array
 
   // Initial render and when dependencies change
   useEffect(() => {
@@ -99,16 +99,38 @@ export function GridOverlay({
     };
   }, [gridRef, drawGrid]);
 
+  // Create an array for rows and columns based on rowCount and cols
+  const rows = Array.from({ length: rowCount });
+  const columns = Array.from({ length: cols });
+
   return (
-    <canvas
-      ref={canvasRef}
-      className="pointer-events-none absolute top-0 left-0"
+    <div
+      className={`pointer-events-none absolute inset-0 z-0 transition-opacity duration-300 ease-in-out ${
+        isVisible ? "opacity-100" : "opacity-0"
+      }`}
       style={{
-        opacity: isVisible ? 1 : 0,
-        transition: "opacity 300ms cubic-bezier(0.4, 0, 0.2, 1)",
-        zIndex: 0,
-        overflow: "visible",
+        display: "grid",
+        gridTemplateColumns: `repeat(${cols}, 1fr)`,
+        gridTemplateRows: `repeat(${rowCount}, ${GRID_CELL_HEIGHT}px)`,
+        gap: 0,
       }}
-    />
+    >
+      {/* Render vertical lines */}
+      {columns.map((_, index) => (
+        <div
+          key={`col-line-${index}`}
+          className="border-r border-dashed border-neutral-300"
+          style={{ gridColumn: index + 1, gridRow: `1 / span ${rowCount}` }}
+        />
+      ))}
+      {/* Render horizontal lines */}
+      {rows.map((_, index) => (
+        <div
+          key={`row-line-${index}`}
+          className="border-b border-dashed border-neutral-300"
+          style={{ gridRow: index + 1, gridColumn: `1 / span ${cols}` }}
+        />
+      ))}
+    </div>
   );
 }

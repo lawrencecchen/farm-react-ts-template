@@ -8,7 +8,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { GRID_CELL_HEIGHT, MIN_ROWS } from "./const";
+import { GRID_CELL_HEIGHT, GRID_COLS, MIN_ROWS } from "./const";
 import { generateLayoutSourceCode } from "./generateLayoutSourceCode";
 import { getFirstComponentName } from "./getFirstComponentName";
 import { GridOverlay } from "./grid-overlay";
@@ -28,6 +28,7 @@ const GridContext = React.createContext<{
   activeItemColSpan: number;
   activeItemRowSpan: number;
   activeItemId: string | null;
+  gridCols: number;
   gridItems: Record<
     string,
     {
@@ -66,6 +67,7 @@ const GridContext = React.createContext<{
   activeItemRowSpan: 0,
   activeItemId: null,
   gridItems: {},
+  gridCols: GRID_COLS,
   setIsResizing: () => {},
   setIsDragging: () => {},
   setActiveItemDimensions: () => {},
@@ -150,6 +152,7 @@ export function GridItem({
     unregisterGridItem,
     updateGridItemPosition,
     expandRowsIfNeeded,
+    gridCols,
   } = useContext(GridContext);
 
   // Add isResizing and isDragging as refs for this specific item
@@ -224,6 +227,7 @@ export function GridItem({
         setActiveItemDimensions,
         updateGridItemPosition,
         expandRowsIfNeeded,
+        gridCols,
       });
     },
     [
@@ -232,6 +236,7 @@ export function GridItem({
       gridItems,
       updateGridItemPosition,
       expandRowsIfNeeded,
+      gridCols,
     ]
   );
 
@@ -557,7 +562,13 @@ export function GridComponent(props: GridItemProps & { componentKey: string }) {
   return <GridItem {...props}>Loading...</GridItem>;
 }
 
-export function Grid({ children }: { children: React.ReactNode }) {
+export function Grid({
+  children,
+  cols = GRID_COLS,
+}: {
+  children: React.ReactNode;
+  cols?: number;
+}) {
   // State to track if any grid item is being resized or dragged
   const [isResizing, setIsResizing] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -661,6 +672,7 @@ export function Grid({ children }: { children: React.ReactNode }) {
       activeItemRowSpan,
       activeItemId,
       gridItems,
+      gridCols: cols,
       setIsResizing: handleSetIsResizing,
       setIsDragging: handleSetIsDragging,
       setActiveItemDimensions,
@@ -684,11 +696,21 @@ export function Grid({ children }: { children: React.ReactNode }) {
       unregisterGridItem,
       updateGridItemPosition,
       expandRowsIfNeeded,
+      cols,
     ]
   );
 
   // Create grid template rows style
   const gridTemplateRows = `repeat(${rowCount}, ${GRID_CELL_HEIGHT}px)`;
+
+  // Memoize the style object for the grid container
+  const gridStyle = useMemo(
+    () => ({
+      gridTemplateRows,
+      gridTemplateColumns: `repeat(${cols}, 1fr)`,
+    }),
+    [gridTemplateRows, cols]
+  );
 
   useEffect(() => {
     const layoutCode = generateLayoutSourceCode({ gridItems });
@@ -703,11 +725,12 @@ export function Grid({ children }: { children: React.ReactNode }) {
             isVisible={isResizing || isDragging}
             rowCount={rowCount}
             gridRef={gridRef}
+            cols={cols}
           />
           <div
             ref={gridRef}
-            className="grid-wrapper relative z-10 grid grid-cols-12 gap-0"
-            style={{ gridTemplateRows }}
+            className="grid-wrapper relative z-10 grid gap-0"
+            style={gridStyle}
           >
             {children}
           </div>
