@@ -207,8 +207,7 @@ export function GridItem({
     startY: 0,
     startColStart: colStart,
     startRowStart: rowStart,
-    startGridX: 0,
-    startGridY: 0,
+    itemStartColRelativeToCursorStartCol: 0,
     startScrollX: 0,
     startScrollY: 0,
   });
@@ -310,7 +309,10 @@ export function GridItem({
       e.stopPropagation();
       e.preventDefault();
 
-      if (!gridItemRef.current) return;
+      if (!gridItemRef.current || !gridItems[itemId]) return;
+
+      const gridWrapper = gridItemRef.current.closest(".grid-wrapper");
+      if (!gridWrapper) return; // Should ideally not happen
 
       isDraggingRef.current = true;
       setIsDragging(true);
@@ -318,6 +320,16 @@ export function GridItem({
       setActiveItemId(itemId);
 
       const currentItem = gridItems[itemId];
+      const gridWrapperRect = gridWrapper.getBoundingClientRect();
+      const cellWidth = gridWrapperRect.width / gridCols;
+
+      const initialCursorScreenX = e.clientX;
+      const initialCursorColZeroIndexed = Math.floor(
+        (initialCursorScreenX - gridWrapperRect.left) / cellWidth
+      );
+      const itemInitialColZeroIndexed = currentItem.colStart - 1;
+      const newItemStartColRelativeToCursorStartCol =
+        itemInitialColZeroIndexed - initialCursorColZeroIndexed;
 
       // Store initial positions
       dragRef.current = {
@@ -325,13 +337,13 @@ export function GridItem({
         startY: e.clientY,
         startColStart: currentItem.colStart,
         startRowStart: currentItem.rowStart,
-        startGridX: 0,
-        startGridY: 0,
+        itemStartColRelativeToCursorStartCol:
+          newItemStartColRelativeToCursorStartCol,
         startScrollX: window.scrollX,
         startScrollY: window.scrollY,
       };
     },
-    [gridItems, setIsDragging, setActiveItemId, itemId]
+    [gridItems, setIsDragging, setActiveItemId, itemId, gridCols]
   );
 
   // If an item is being dragged or resized, only that item can respond.

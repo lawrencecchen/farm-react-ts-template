@@ -152,8 +152,7 @@ export const handleMouseMove = (
       startY: number;
       startColStart: number;
       startRowStart: number;
-      startGridX: number;
-      startGridY: number;
+      itemStartColRelativeToCursorStartCol: number;
       startScrollX: number;
       startScrollY: number;
     }>;
@@ -459,42 +458,39 @@ export const handleMouseMove = (
 
   // Handle drag
   else if (isDraggingRef.current && gridItemRef.current) {
-    // Calculate the delta movement
-    const deltaX = e.clientX - dragRef.current.startX;
-    const deltaY = e.clientY - dragRef.current.startY;
-
-    // Account for scrolling
-    const scrollDeltaX = window.scrollX - dragRef.current.startScrollX;
-    const scrollDeltaY = window.scrollY - dragRef.current.startScrollY;
-
-    // Adjust delta values with scroll changes
-    const adjustedDeltaX = deltaX + scrollDeltaX;
-    const adjustedDeltaY = deltaY + scrollDeltaY;
-
-    // Get the current cell width based on the grid container width
     const gridContainer = gridItemRef.current.closest(".grid-wrapper");
     if (!gridContainer) return;
 
-    const cellWidth = gridContainer.getBoundingClientRect().width / gridCols;
+    const gridContainerRect = gridContainer.getBoundingClientRect();
+    const cellWidth = gridContainerRect.width / gridCols;
 
-    // Calculate new grid positions
-    const deltaColStart = Math.round(adjustedDeltaX / cellWidth);
-    const deltaRowStart = Math.round(adjustedDeltaY / GRID_CELL_HEIGHT);
-
-    // Calculate new colStart and rowStart with constraints
-    // For horizontal movement: ensure we don't exceed grid boundaries (1 to gridCols + 1 - colSpan)
-    const newColStart = Math.max(
-      1,
-      Math.min(
-        gridCols + 1 - gridItems[itemId].colSpan,
-        dragRef.current.startColStart + deltaColStart
-      )
+    const currentCursorScreenX = e.clientX;
+    const currentCursorColZeroIndexed = Math.floor(
+      (currentCursorScreenX - gridContainerRect.left) / cellWidth
     );
 
-    // For vertical movement: only constrain to minimum of 1 (no maximum)
+    const itemColOffset = dragRef.current.itemStartColRelativeToCursorStartCol;
+    const newItemTargetColZeroIndexed =
+      currentCursorColZeroIndexed + itemColOffset;
+    let newColStart = newItemTargetColZeroIndexed + 1;
+
+    // Vertical movement logic (remains based on deltaY from original startY)
+    const deltaY = e.clientY - dragRef.current.startY;
+    const scrollDeltaY = window.scrollY - dragRef.current.startScrollY;
+    const adjustedDeltaY = deltaY + scrollDeltaY;
+    const deltaRowStart = Math.round(adjustedDeltaY / GRID_CELL_HEIGHT);
     const newRowStart = Math.max(
       1,
       dragRef.current.startRowStart + deltaRowStart
+    );
+
+    // Constrain newColStart to grid boundaries
+    newColStart = Math.max(
+      1, // Min colStart is 1
+      Math.min(
+        gridCols + 1 - gridItems[itemId].colSpan, // Max colStart allows item to fit
+        newColStart
+      )
     );
 
     // Calculate the bottom-most row this item will occupy
