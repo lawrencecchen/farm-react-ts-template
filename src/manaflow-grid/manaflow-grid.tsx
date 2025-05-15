@@ -577,9 +577,13 @@ export function GridComponent(props: GridItemProps & { componentKey: string }) {
 export function Grid({
   children,
   cols = GRID_COLS,
+  gridLineStyle,
+  gridLineColor,
 }: {
   children: React.ReactNode;
   cols?: number;
+  gridLineStyle?: "solid" | "dotted";
+  gridLineColor?: string;
 }) {
   // State to track if any grid item is being resized or dragged
   const [isResizing, setIsResizing] = useState(false);
@@ -738,6 +742,8 @@ export function Grid({
             rowCount={rowCount}
             gridRef={gridRef}
             cols={cols}
+            lineStyle={gridLineStyle}
+            lineColor={gridLineColor}
           />
           <div
             ref={gridRef}

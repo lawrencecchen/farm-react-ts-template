@@ -6,6 +6,8 @@ export interface GridOverlayProps {
   rowCount: number;
   gridRef: React.RefObject<HTMLDivElement>;
   cols: number;
+  lineStyle?: "solid" | "dotted";
+  lineColor?: string;
 }
 
 export function GridOverlay({
@@ -13,6 +15,8 @@ export function GridOverlay({
   rowCount,
   gridRef,
   cols,
+  lineStyle = "solid",
+  lineColor = "rgba(212, 212, 212, 0.4)",
 }: GridOverlayProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -47,8 +51,14 @@ export function GridOverlay({
     ctx.clearRect(0, 0, width, height);
 
     // Set line style
-    ctx.strokeStyle = "rgba(212, 212, 212, 0.6)"; // Equivalent to bg-neutral-200 with lighter transparency
+    ctx.strokeStyle = lineColor;
     ctx.lineWidth = 1;
+
+    if (lineStyle === "dotted") {
+      ctx.setLineDash([2, 3]);
+    } else {
+      ctx.setLineDash([]);
+    }
 
     // Draw vertical grid lines
     const cellWidth = width / cols; // Use cols from props
@@ -69,7 +79,7 @@ export function GridOverlay({
       ctx.lineTo(width, y);
       ctx.stroke();
     }
-  }, [gridRef, rowCount, cols]); // Add cols to dependency array
+  }, [gridRef, rowCount, cols, lineColor, lineStyle]); // Add cols to dependency array
 
   // Initial render and when dependencies change
   useEffect(() => {
@@ -100,37 +110,19 @@ export function GridOverlay({
   }, [gridRef, drawGrid]);
 
   // Create an array for rows and columns based on rowCount and cols
-  const rows = Array.from({ length: rowCount });
-  const columns = Array.from({ length: cols });
+  // const rows = Array.from({ length: rowCount });
+  // const columns = Array.from({ length: cols });
 
   return (
     <div
       className={`pointer-events-none absolute inset-0 z-0 transition-opacity duration-300 ease-in-out ${
         isVisible ? "opacity-100" : "opacity-0"
       }`}
-      style={{
-        display: "grid",
-        gridTemplateColumns: `repeat(${cols}, 1fr)`,
-        gridTemplateRows: `repeat(${rowCount}, ${GRID_CELL_HEIGHT}px)`,
-        gap: 0,
-      }}
     >
-      {/* Render vertical lines */}
-      {columns.map((_, index) => (
-        <div
-          key={`col-line-${index}`}
-          className="border-r border-dashed border-neutral-300"
-          style={{ gridColumn: index + 1, gridRow: `1 / span ${rowCount}` }}
-        />
-      ))}
-      {/* Render horizontal lines */}
-      {rows.map((_, index) => (
-        <div
-          key={`row-line-${index}`}
-          className="border-b border-dashed border-neutral-300"
-          style={{ gridRow: index + 1, gridColumn: `1 / span ${cols}` }}
-        />
-      ))}
+      <canvas
+        ref={canvasRef}
+        style={{ position: "absolute", top: 0, left: 0 }}
+      />
     </div>
   );
 }
