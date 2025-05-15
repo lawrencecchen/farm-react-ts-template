@@ -62,21 +62,42 @@ export function GridOverlay({
 
     // Draw vertical grid lines
     const cellWidth = width / cols; // Use cols from props
-
     for (let col = 0; col <= cols; col++) {
-      const x = col * cellWidth;
+      let xPos: number;
+      if (col === 0) {
+        xPos = 0.5; // Leftmost line
+      } else if (col === cols) {
+        // Ensure the rightmost line is drawn just inside the canvas boundary
+        xPos = Math.max(0.5, width - 0.5);
+      } else {
+        xPos = Math.floor(col * cellWidth) + 0.5; // Internal lines
+      }
+      // Clamp to be safe, especially for width - 0.5 in very narrow cases
+      xPos = Math.max(0.5, Math.min(xPos, width - 0.5));
+
       ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, height);
+      ctx.moveTo(xPos, 0);
+      ctx.lineTo(xPos, height);
       ctx.stroke();
     }
 
     // Draw horizontal grid lines
     for (let row = 0; row <= rowCount; row++) {
-      const y = row * GRID_CELL_HEIGHT;
+      let yPos: number;
+      if (row === 0) {
+        yPos = 0.5; // Topmost line
+      } else if (row === rowCount) {
+        // Ensure the bottommost line is drawn just inside the canvas boundary
+        yPos = Math.max(0.5, height - 0.5);
+      } else {
+        yPos = Math.floor(row * GRID_CELL_HEIGHT) + 0.5; // Internal lines
+      }
+      // Clamp to be safe, especially for height - 0.5 in very short cases
+      yPos = Math.max(0.5, Math.min(yPos, height - 0.5));
+
       ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(width, y);
+      ctx.moveTo(0, yPos);
+      ctx.lineTo(width, yPos);
       ctx.stroke();
     }
   }, [gridRef, rowCount, cols, lineColor, lineStyle]); // Add cols to dependency array
