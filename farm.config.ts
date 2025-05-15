@@ -8,4 +8,7 @@ export default defineConfig({
   compilation: {
     lazyCompilation: true,
   },
+  server: {
+    port: 3000,
+  },
 });
