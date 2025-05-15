@@ -48,7 +48,7 @@ const GridContext = React.createContext<{
     rowStart: number,
     colSpan: number,
     rowSpan: number,
-    componentName: string,
+    componentName: string
   ) => void;
   unregisterGridItem: (id: string) => void;
   updateGridItemPosition: (
@@ -56,7 +56,7 @@ const GridContext = React.createContext<{
     colStart: number,
     rowStart: number,
     colSpan: number,
-    rowSpan: number,
+    rowSpan: number
   ) => void;
   expandRowsIfNeeded: (requestedRow: number) => void;
 }>({
@@ -93,7 +93,7 @@ function useGridRows(containerRef: React.RefObject<HTMLDivElement>) {
       const containerHeight = containerRef.current.clientHeight;
       const calculatedRows = Math.max(
         MIN_ROWS,
-        Math.ceil(containerHeight / GRID_CELL_HEIGHT),
+        Math.ceil(containerHeight / GRID_CELL_HEIGHT)
       );
       setRowCount(calculatedRows);
     };
@@ -165,7 +165,7 @@ export function GridItem({
       rowStart,
       colSpan,
       rowSpan,
-      componentName,
+      componentName
     );
 
     // Unregister when unmounted
@@ -232,7 +232,7 @@ export function GridItem({
       gridItems,
       updateGridItemPosition,
       expandRowsIfNeeded,
-    ],
+    ]
   );
 
   // Handle mouse up (for both resize and drag)
@@ -296,13 +296,7 @@ export function GridItem({
       // Update the grid context with initial dimensions
       setActiveItemDimensions(currentItem.colSpan, currentItem.rowSpan);
     },
-    [
-      gridItems,
-      setIsResizing,
-      setActiveItemId,
-      itemId,
-      setActiveItemDimensions,
-    ],
+    [gridItems, setIsResizing, setActiveItemId, itemId, setActiveItemDimensions]
   );
 
   // Handle drag start
@@ -332,7 +326,7 @@ export function GridItem({
         startScrollY: window.scrollY,
       };
     },
-    [gridItems, setIsDragging, setActiveItemId, itemId],
+    [gridItems, setIsDragging, setActiveItemId, itemId]
   );
 
   // If an item is being dragged or resized, only that item can respond.
@@ -455,7 +449,7 @@ export function GridItem({
         <div
           className={clsx(
             "absolute z-20 flex h-8 w-8 cursor-move items-center justify-center",
-            "-top-3 left-0",
+            "-top-3 left-0"
             // TODO: Add this back in when we have a way to handle the top row
             // currentItem.rowStart > 2
             //   ? "-top-5 left-0"
@@ -591,7 +585,7 @@ export function Grid({ children }: { children: React.ReactNode }) {
       setActiveItemColSpan(colSpan);
       setActiveItemRowSpan(rowSpan);
     },
-    [],
+    []
   );
 
   // Function to register a grid item
@@ -602,14 +596,14 @@ export function Grid({ children }: { children: React.ReactNode }) {
       rowStart: number,
       colSpan: number,
       rowSpan: number,
-      componentName = "Unknown",
+      componentName = "Unknown"
     ) => {
       setGridItems((prevItems) => ({
         ...prevItems,
         [id]: { colStart, rowStart, colSpan, rowSpan, componentName },
       }));
     },
-    [],
+    []
   );
 
   // Function to unregister a grid item
@@ -628,7 +622,7 @@ export function Grid({ children }: { children: React.ReactNode }) {
       colStart: number,
       rowStart: number,
       colSpan: number,
-      rowSpan: number,
+      rowSpan: number
     ) => {
       setGridItems((prevItems) => {
         // Preserve the componentName from the existing item
@@ -641,7 +635,7 @@ export function Grid({ children }: { children: React.ReactNode }) {
         };
       });
     },
-    [],
+    []
   );
 
   // Reference to the grid container
@@ -690,7 +684,7 @@ export function Grid({ children }: { children: React.ReactNode }) {
       unregisterGridItem,
       updateGridItemPosition,
       expandRowsIfNeeded,
-    ],
+    ]
   );
 
   // Create grid template rows style

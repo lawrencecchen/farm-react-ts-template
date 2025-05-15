@@ -8,7 +8,11 @@ interface GridOverlayProps {
   gridRef: RefObject<HTMLDivElement>;
 }
 
-export function GridOverlay({ isVisible, rowCount, gridRef }: GridOverlayProps) {
+export function GridOverlay({
+  isVisible,
+  rowCount,
+  gridRef,
+}: GridOverlayProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Main drawing function to keep code DRY

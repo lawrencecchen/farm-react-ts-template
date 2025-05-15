@@ -16,7 +16,7 @@ export const checkCollisions = (
       rowSpan: number;
       componentName: string;
     }
-  >,
+  >
 ) => {
   // Get the cells that would be occupied by this grid item
   const occupiedCells = new Set<string>();
@@ -92,7 +92,7 @@ export const checkAxisCollisions = (
       rowSpan: number;
       componentName: string;
     }
-  >,
+  >
 ): { horizontal: boolean; vertical: boolean } => {
   // Default result - no collisions on either axis
   const result = { horizontal: false, vertical: false };
@@ -105,7 +105,7 @@ export const checkAxisCollisions = (
       original.rowStart,
       horizontalOnly.colSpan,
       original.rowSpan,
-      gridItems,
+      gridItems
     );
     result.horizontal = horizontalCollisions.length > 0;
   }
@@ -118,7 +118,7 @@ export const checkAxisCollisions = (
       verticalOnly.rowStart,
       original.colSpan,
       verticalOnly.rowSpan,
-      gridItems,
+      gridItems
     );
     result.vertical = verticalCollisions.length > 0;
   }
@@ -168,9 +168,15 @@ export const handleMouseMove = (
       }
     >;
     setActiveItemDimensions: (colSpan: number, rowSpan: number) => void;
-    updateGridItemPosition: (id: string, colStart: number, rowStart: number, colSpan: number, rowSpan: number) => void;
+    updateGridItemPosition: (
+      id: string,
+      colStart: number,
+      rowStart: number,
+      colSpan: number,
+      rowSpan: number
+    ) => void;
     expandRowsIfNeeded: (requestedRow: number) => void;
-  },
+  }
 ) => {
   const {
     isResizingRef,
@@ -210,14 +216,20 @@ export const handleMouseMove = (
     let newColStart = gridItems[itemId].colStart;
 
     // Handle horizontal resizing
-    if (resizeRef.current.corner.includes("Right") || resizeRef.current.corner === "Right") {
+    if (
+      resizeRef.current.corner.includes("Right") ||
+      resizeRef.current.corner === "Right"
+    ) {
       // Only allow horizontal resizing - right edge can only move horizontally
       newWidth += adjustedDeltaX;
 
       // Ensure we don't exceed grid boundaries
       const maxWidth = (13 - newColStart) * cellWidth;
       newWidth = Math.min(newWidth, maxWidth);
-    } else if (resizeRef.current.corner.includes("Left") || resizeRef.current.corner === "Left") {
+    } else if (
+      resizeRef.current.corner.includes("Left") ||
+      resizeRef.current.corner === "Left"
+    ) {
       // For left resize, moving left (negative deltaX) should increase width
       // Moving right (positive deltaX) should decrease width
 
@@ -225,13 +237,18 @@ export const handleMouseMove = (
       const deltaColumns = Math.round(adjustedDeltaX / cellWidth);
 
       // Calculate new colStart (moving left decreases colStart, moving right increases it)
-      const potentialNewColStart = resizeRef.current.startColStart + deltaColumns;
+      const potentialNewColStart =
+        resizeRef.current.startColStart + deltaColumns;
 
       // Ensure colStart stays within valid range (1 to 12)
-      let newPotentialColStart = Math.max(1, Math.min(12, potentialNewColStart));
+      let newPotentialColStart = Math.max(
+        1,
+        Math.min(12, potentialNewColStart)
+      );
 
       // Don't allow moving beyond the right edge of the original element
-      const rightEdgeLimit = resizeRef.current.startColStart + resizeRef.current.startColSpan - 1;
+      const rightEdgeLimit =
+        resizeRef.current.startColStart + resizeRef.current.startColSpan - 1;
       if (newPotentialColStart > rightEdgeLimit) {
         newPotentialColStart = rightEdgeLimit;
       }
@@ -250,13 +267,19 @@ export const handleMouseMove = (
     let newRowStart = gridItems[itemId].rowStart;
 
     // Handle vertical resizing
-    if (resizeRef.current.corner.includes("Bottom") || resizeRef.current.corner === "Bottom") {
+    if (
+      resizeRef.current.corner.includes("Bottom") ||
+      resizeRef.current.corner === "Bottom"
+    ) {
       // Only allow vertical resizing - bottom edge can only move vertically
       newHeight += adjustedDeltaY;
 
       // Don't impose a strict maximum height, but ensure it's reasonable
       newHeight = Math.max(GRID_CELL_HEIGHT, newHeight);
-    } else if (resizeRef.current.corner.includes("Top") || resizeRef.current.corner === "Top") {
+    } else if (
+      resizeRef.current.corner.includes("Top") ||
+      resizeRef.current.corner === "Top"
+    ) {
       // For top resize, moving up (negative deltaY) should increase height
       // Moving down (positive deltaY) should decrease height
 
@@ -270,7 +293,8 @@ export const handleMouseMove = (
       let newPotentialRowStart = Math.max(1, potentialNewRowStart);
 
       // Don't allow moving beyond the bottom edge of the original element
-      const bottomEdgeLimit = resizeRef.current.startRowStart + resizeRef.current.startRowSpan - 1;
+      const bottomEdgeLimit =
+        resizeRef.current.startRowStart + resizeRef.current.startRowSpan - 1;
       if (newPotentialRowStart > bottomEdgeLimit) {
         newPotentialRowStart = bottomEdgeLimit;
       }
@@ -282,15 +306,22 @@ export const handleMouseMove = (
 
       // When moving up (decreasing rowStart), increase height
       // When moving down (increasing rowStart), decrease height
-      newHeight = resizeRef.current.startHeight - actualDeltaRows * GRID_CELL_HEIGHT;
+      newHeight =
+        resizeRef.current.startHeight - actualDeltaRows * GRID_CELL_HEIGHT;
     }
 
     // For edge-only resizing (not corners), only apply changes to the relevant dimension
-    if (resizeRef.current.corner === "Left" || resizeRef.current.corner === "Right") {
+    if (
+      resizeRef.current.corner === "Left" ||
+      resizeRef.current.corner === "Right"
+    ) {
       // Only horizontal resizing, keep height unchanged
       newHeight = resizeRef.current.startHeight;
       newRowStart = resizeRef.current.startRowStart;
-    } else if (resizeRef.current.corner === "Top" || resizeRef.current.corner === "Bottom") {
+    } else if (
+      resizeRef.current.corner === "Top" ||
+      resizeRef.current.corner === "Bottom"
+    ) {
       // Only vertical resizing, keep width unchanged
       newWidth = resizeRef.current.startWidth;
       newColStart = resizeRef.current.startColStart;
@@ -301,7 +332,10 @@ export const handleMouseMove = (
     newHeight = Math.max(GRID_CELL_HEIGHT, newHeight);
 
     // Calculate new spans based on dynamic grid cell dimensions
-    let newColSpan = Math.max(1, Math.min(12, Math.round(newWidth / cellWidth)));
+    let newColSpan = Math.max(
+      1,
+      Math.min(12, Math.round(newWidth / cellWidth))
+    );
 
     // For row span, use the fixed row height
     const newRowSpan = Math.max(1, Math.round(newHeight / GRID_CELL_HEIGHT));
@@ -320,9 +354,13 @@ export const handleMouseMove = (
     };
 
     // Determine if we're changing horizontal or vertical dimensions or both
-    const isHorizontalChange = newColStart !== originalPosition.colStart || newColSpan !== originalPosition.colSpan;
+    const isHorizontalChange =
+      newColStart !== originalPosition.colStart ||
+      newColSpan !== originalPosition.colSpan;
 
-    const isVerticalChange = newRowStart !== originalPosition.rowStart || newRowSpan !== originalPosition.rowSpan;
+    const isVerticalChange =
+      newRowStart !== originalPosition.rowStart ||
+      newRowSpan !== originalPosition.rowSpan;
 
     // If doing a corner drag, check both axes separately
     if (isHorizontalChange && isVerticalChange) {
@@ -342,27 +380,54 @@ export const handleMouseMove = (
       };
 
       // Check for collisions on each axis separately
-      const axisCollisions = checkAxisCollisions(itemId, horizontalOnly, verticalOnly, originalPosition, gridItems);
+      const axisCollisions = checkAxisCollisions(
+        itemId,
+        horizontalOnly,
+        verticalOnly,
+        originalPosition,
+        gridItems
+      );
 
       // Determine final positions based on collision results
-      const finalColStart = axisCollisions.horizontal ? originalPosition.colStart : newColStart;
+      const finalColStart = axisCollisions.horizontal
+        ? originalPosition.colStart
+        : newColStart;
 
-      const finalColSpan = axisCollisions.horizontal ? originalPosition.colSpan : newColSpan;
+      const finalColSpan = axisCollisions.horizontal
+        ? originalPosition.colSpan
+        : newColSpan;
 
-      const finalRowStart = axisCollisions.vertical ? originalPosition.rowStart : newRowStart;
+      const finalRowStart = axisCollisions.vertical
+        ? originalPosition.rowStart
+        : newRowStart;
 
-      const finalRowSpan = axisCollisions.vertical ? originalPosition.rowSpan : newRowSpan;
+      const finalRowSpan = axisCollisions.vertical
+        ? originalPosition.rowSpan
+        : newRowSpan;
 
       // Only update if at least one axis can move
       if (!axisCollisions.horizontal || !axisCollisions.vertical) {
-        updateGridItemPosition(itemId, finalColStart, finalRowStart, finalColSpan, finalRowSpan);
+        updateGridItemPosition(
+          itemId,
+          finalColStart,
+          finalRowStart,
+          finalColSpan,
+          finalRowSpan
+        );
 
         // Update the active item dimensions in the context
         setActiveItemDimensions(finalColSpan, finalRowSpan);
       }
     } else {
       // For single-axis movements, do the regular collision check
-      const collisions = checkCollisions(itemId, newColStart, newRowStart, newColSpan, newRowSpan, gridItems);
+      const collisions = checkCollisions(
+        itemId,
+        newColStart,
+        newRowStart,
+        newColSpan,
+        newRowSpan,
+        gridItems
+      );
 
       // If there are no collisions, update position
       if (collisions.length === 0) {
@@ -375,7 +440,13 @@ export const handleMouseMove = (
           newRowStart !== currentItem.rowStart
         ) {
           // Update grid context with new dimensions for this item
-          updateGridItemPosition(itemId, newColStart, newRowStart, newColSpan, newRowSpan);
+          updateGridItemPosition(
+            itemId,
+            newColStart,
+            newRowStart,
+            newColSpan,
+            newRowSpan
+          );
 
           // Update the active item dimensions in the context
           setActiveItemDimensions(newColSpan, newRowSpan);
@@ -412,11 +483,17 @@ export const handleMouseMove = (
     // For horizontal movement: ensure we don't exceed grid boundaries (1 to 13-colSpan)
     const newColStart = Math.max(
       1,
-      Math.min(13 - gridItems[itemId].colSpan, dragRef.current.startColStart + deltaColStart),
+      Math.min(
+        13 - gridItems[itemId].colSpan,
+        dragRef.current.startColStart + deltaColStart
+      )
     );
 
     // For vertical movement: only constrain to minimum of 1 (no maximum)
-    const newRowStart = Math.max(1, dragRef.current.startRowStart + deltaRowStart);
+    const newRowStart = Math.max(
+      1,
+      dragRef.current.startRowStart + deltaRowStart
+    );
 
     // Calculate the bottom-most row this item will occupy
     const bottomRow = newRowStart + gridItems[itemId].rowSpan - 1;
@@ -454,12 +531,22 @@ export const handleMouseMove = (
       };
 
       // Check for collisions on each axis separately
-      const axisCollisions = checkAxisCollisions(itemId, horizontalOnly, verticalOnly, originalPosition, gridItems);
+      const axisCollisions = checkAxisCollisions(
+        itemId,
+        horizontalOnly,
+        verticalOnly,
+        originalPosition,
+        gridItems
+      );
 
       // Determine final positions based on collision results
-      const finalColStart = axisCollisions.horizontal ? originalPosition.colStart : newColStart;
+      const finalColStart = axisCollisions.horizontal
+        ? originalPosition.colStart
+        : newColStart;
 
-      const finalRowStart = axisCollisions.vertical ? originalPosition.rowStart : newRowStart;
+      const finalRowStart = axisCollisions.vertical
+        ? originalPosition.rowStart
+        : newRowStart;
 
       // Only update if at least one axis can move
       if (!axisCollisions.horizontal || !axisCollisions.vertical) {
@@ -468,7 +555,7 @@ export const handleMouseMove = (
           finalColStart,
           finalRowStart,
           originalPosition.colSpan,
-          originalPosition.rowSpan,
+          originalPosition.rowSpan
         );
       }
     } else {
@@ -479,13 +566,19 @@ export const handleMouseMove = (
         newRowStart,
         gridItems[itemId].colSpan,
         gridItems[itemId].rowSpan,
-        gridItems,
+        gridItems
       );
 
       // Only update position if there are no collisions
       if (collisions.length === 0) {
         // Update position
-        updateGridItemPosition(itemId, newColStart, newRowStart, gridItems[itemId].colSpan, gridItems[itemId].rowSpan);
+        updateGridItemPosition(
+          itemId,
+          newColStart,
+          newRowStart,
+          gridItems[itemId].colSpan,
+          gridItems[itemId].rowSpan
+        );
       }
     }
   }
